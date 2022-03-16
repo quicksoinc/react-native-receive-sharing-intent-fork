@@ -4,7 +4,7 @@ import android.app.Activity;
 import android.app.Application;
 import android.content.Intent;
 
-
+import java.util.*;
 import android.os.Build;
 import androidx.annotation.RequiresApi;
 import com.facebook.react.bridge.Promise;
@@ -18,7 +18,7 @@ public class ReceiveSharingIntentModule extends ReactContextBaseJavaModule {
 
   private final ReactApplicationContext reactContext;
   private ReceiveSharingIntentHelper receiveSharingIntentHelper;
-  private Intent oldIntent;
+  private Set<String> handledIntentIds = new HashSet<String> ();
 
   public ReceiveSharingIntentModule(ReactApplicationContext reactContext) {
     super(reactContext);
@@ -31,7 +31,6 @@ public class ReceiveSharingIntentModule extends ReactContextBaseJavaModule {
   protected void onNewIntent(Intent intent) {
     Activity mActivity = getCurrentActivity();
     if(mActivity == null) { return; }
-    oldIntent = mActivity.getIntent();
     mActivity.setIntent(intent);
   }
 
@@ -39,11 +38,18 @@ public class ReceiveSharingIntentModule extends ReactContextBaseJavaModule {
   @ReactMethod
   public void getFileNames(Promise promise){
     Activity mActivity = getCurrentActivity();
-    if(mActivity == null) { return; }
+    if (mActivity == null) {
+      return;
+    }
     Intent intent = mActivity.getIntent();
-    receiveSharingIntentHelper.sendFileNames(reactContext, intent, promise);
-    if (oldIntent != null) {
-      mActivity.setIntent(oldIntent);
+    String intentId = intent.getIdentifier();
+
+    if (!handledIntentIds.contains(intentId)){
+      receiveSharingIntentHelper.sendFileNames(reactContext, intent, promise);
+
+      String newIdentifier = UUID.randomUUID().toString();
+      intent.setIdentifier(newIdentifier);
+      handledIntentIds.add(newIdentifier);
     }
   }
 
