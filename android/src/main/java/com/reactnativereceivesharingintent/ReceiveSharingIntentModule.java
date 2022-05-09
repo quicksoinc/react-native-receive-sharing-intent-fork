@@ -42,14 +42,19 @@ public class ReceiveSharingIntentModule extends ReactContextBaseJavaModule {
       return;
     }
     Intent intent = mActivity.getIntent();
-    String intentId = intent.getIdentifier();
 
-    if (!handledIntentIds.contains(intentId)){
-      receiveSharingIntentHelper.sendFileNames(reactContext, intent, promise);
+    try {
+      String intentId = intent.getIdentifier();
 
-      String newIdentifier = UUID.randomUUID().toString();
-      intent.setIdentifier(newIdentifier);
-      handledIntentIds.add(newIdentifier);
+      if (!handledIntentIds.contains(intentId)){
+        receiveSharingIntentHelper.sendFileNames(reactContext, intent, promise);
+
+        String newIdentifier = UUID.randomUUID().toString();
+        intent.setIdentifier(newIdentifier);
+        handledIntentIds.add(newIdentifier);
+      }
+    } catch (Exception e) {
+      promise.reject("getFileNames error", e.toString());
     }
   }
 
