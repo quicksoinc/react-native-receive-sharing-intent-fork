@@ -53,8 +53,8 @@ public class ReceiveSharingIntentModule extends ReactContextBaseJavaModule {
         intent.setIdentifier(newIdentifier);
         handledIntentIds.add(newIdentifier);
       }
-    } catch (Exception e) {
-      promise.reject("getFileNames error", e.toString());
+    } catch (Throwable t) {
+      promise.reject("getFileNames error", t.toString());
     }
   }
 
